@@ -41,79 +41,55 @@ function like_and_dislike_entity_view(array &$build, EntityInterface $entity, En
   $config = \Drupal::config('like_and_dislike.settings');
   $enabled_view_modes = ['full'];
   $config_id = $entity->getEntityTypeId() . '_' . $entity->bundle() . '_available';
-  if ($config->get($config_id, FALSE)
+
+  $entity_type_ids_available_to_vote = \Drupal\like_and_dislike\LikeDislikePermissions::getEntityTypesAvailableToVote();
+
+  $account = \Drupal::currentUser();
+
+  if (
+    in_array($entity->getEntityTypeId(), $entity_type_ids_available_to_vote)
+    && $config->get($config_id, FALSE)
     && in_array($view_mode, $enabled_view_modes)
   ) {
+    $entity_type_id = $entity->getEntityTypeId();
     $links = [];
-    $links['like'] = array(
-      'title' => $entity->like . ' Like',
-      'url' => Url::fromRoute('like_and_dislike.vote', [
-        'entity_type_id' => $entity->getEntityTypeId(),
-        'vote_type_id' => 'like',
-        'entity_id' => $entity->id(),
-        'destination' => drupal_get_destination()['destination']
-      ]),
-    );
-    $links['dislike'] = array(
-      'title' => $entity->dislike . ' Dislike',
-      'url' => Url::fromRoute('like_and_dislike.vote', [
-        'entity_type_id' => $entity->getEntityTypeId(),
-        'vote_type_id' => 'dislike',
-        'entity_id' => $entity->id(),
-        'destination' => drupal_get_destination()['destination']
-      ], [
-      ]),
-    );
+    if ($account->hasPermission("add or remove like votes on $entity_type_id")) {
+      $like_item = \Drupal\Core\Link::fromTextAndUrl(
+        $entity->like . ' Like',
+        Url::fromRoute('like_and_dislike.vote', [
+          'entity_type_id' => $entity->getEntityTypeId(),
+          'vote_type_id' => 'like',
+          'entity_id' => $entity->id(),
+          'destination' => drupal_get_destination()['destination']
+        ])
+      );
+    }
+    else {
+      $like_item = $entity->like . ' Like';
+    }
+    $links['like'] = $like_item;
+    if ($account->hasPermission("add or remove like votes on $entity_type_id")) {
+      $dislike_item = \Drupal\Core\Link::fromTextAndUrl(
+        $entity->dislike . ' Dislike',
+        Url::fromRoute('like_and_dislike.vote', [
+          'entity_type_id' => $entity->getEntityTypeId(),
+          'vote_type_id' => 'dislike',
+          'entity_id' => $entity->id(),
+          'destination' => drupal_get_destination()['destination']
+        ])
+      );
+    }
+    else {
+      $dislike_item = $entity->dislike . ' Dislike';
+    }
+    $links['dislike'] = $dislike_item;
+
     $build['votingapi_links'] = array(
-      '#theme' => 'links__votingapi',
-      '#links' => $links,
+      '#theme' => 'item_list__votingapi',
+      '#items' => $links,
       '#attributes' => array('class' => array('links', 'inline')),
     );
   }
-
-  //  $Entity = new \Drupal\like_and_dislike\Model\Entity($entity);
-  //
-  //  if ($Entity->voteIsAvailable()) {
-  //    global $user;
-  //    $can_vote = $Entity->userCanVote($user);
-  //
-  //    // Check the voting status based on the permission and if already voted for like or dislike as he can't repeat vote
-  //    if ($user->uid == 0) {
-  //      $ip = ip_address();
-  //      $likestatus = $can_vote ? $Entity->getLikesAmount($user->uid, $ip) : 1;
-  //      $dislikestatus = $can_vote ? $Entity->getDislikesAmount($user->uid, $ip) : 1;
-  //    }
-  //    else {
-  //      $likestatus = $can_vote ? $Entity->getLikesAmount($user->uid) : 1;
-  //      $dislikestatus = $can_vote ? $Entity->getDislikesAmount($user->uid) : 1;
-  //    }
-  //
-  //    // Don't display the like/dislike if has no permissions to view
-  //    if ($can_vote || $Entity->userCanViewVotes()) {
-  //      if (isset($entity->like) && isset($entity->dislike)) {
-  //        $id = 'like-and-dislike-widget-' . $Entity->entity_type . '-' . $Entity->entity_id;
-  //        $like_widget = theme('like', array(
-  //          'entity_id' => $Entity->entity_id,
-  //          'likes' => $Entity->getLikesAmount(),
-  //          'likestatus' => $likestatus,
-  //          'entity_type' => $Entity->entity_type,
-  //        ));
-  //        $dislike_widget = theme('dislike', array(
-  //          'entity_id' => $Entity->entity_id,
-  //          'dislikes' => $Entity->getDislikesAmount(),
-  //          'dislikestatus' => $dislikestatus,
-  //          'entity_type' => $Entity->entity_type,
-  //        ));
-  //        $entity->content['like_and_dislike_widgets'] = array(
-  //          '#prefix' => '<div id="' . $id . '" class="like-and-dislike-widget clearfix">',
-  //          '#suffix' => '</div>',
-  //          '#markup' => $like_widget . $dislike_widget,
-  //          '#weight' => 100,
-  //        );
-  //      }
-  //    }
-  //  }
-  //  return $entity;
 }
 
 function like_and_dislike_vote_insert(EntityInterface $vote) {

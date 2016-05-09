@@ -58,7 +58,7 @@ class LikeDislikePermissions {
   protected function buildPermissions(ConfigEntityInterface $type) {
     $perms = [];
     $entity_type_ids = \Drupal::entityManager()->getEntityTypeLabels();
-    $entity_type_ids_available_to_vote = ['comment', 'node'];
+    $entity_type_ids_available_to_vote = self::getEntityTypesAvailableToVote();
 
     foreach ($entity_type_ids_available_to_vote as $entity_type_id) {
       $type_params['%entity_type_name'] = $entity_type_ids[$entity_type_id]->render();
@@ -74,6 +74,10 @@ class LikeDislikePermissions {
       }
     }
     return $perms;
+  }
+
+  public static function getEntityTypesAvailableToVote() {
+    return ['comment', 'node'];
   }
 
 }
