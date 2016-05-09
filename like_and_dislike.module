@@ -37,7 +37,7 @@ function like_and_dislike_entity_load(array $entities, $entity_type_id) {
 /**
  * Renders the like/dislike buttons if the user has permission to see it
  */
-function like_and_dislike_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode, $langcode) {
+function like_and_dislike_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
   $config = \Drupal::config('like_and_dislike.settings');
   $enabled_view_modes = ['full'];
   $config_id = $entity->getEntityTypeId() . '_' . $entity->bundle() . '_available';
