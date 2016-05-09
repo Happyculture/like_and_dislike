@@ -56,26 +56,23 @@ class LikeDislikePermissions {
    *   An associative array of permission names and descriptions.
    */
   protected function buildPermissions(ConfigEntityInterface $type) {
-    $type_id = $type->id();
-    $type_params = array('%type_name' => $type->label());
-
     $perms = [];
-    foreach (VoteType::loadMultiple() as $vote_type) {
-      $type_params['%vote_type_name'] = $vote_type->label();
-      $vote_type_id = $vote_type->id();
-      $perms["create $vote_type_id vote on $type_id"] = [
-        'title' => $this->t(
-          '%type_name: add %vote_type_name',
-          $type_params
-        ),
-      ];
+    $entity_type_ids = \Drupal::entityManager()->getEntityTypeLabels();
+    $entity_type_ids_available_to_vote = ['comment', 'node'];
+
+    foreach ($entity_type_ids_available_to_vote as $entity_type_id) {
+      $type_params['%entity_type_name'] = $entity_type_ids[$entity_type_id]->render();
+      foreach (VoteType::loadMultiple() as $vote_type) {
+        $type_params['%vote_type_name'] = $vote_type->label();
+        $vote_type_id = $vote_type->id();
+        $perms["add or remove $vote_type_id votes on $entity_type_id"] = [
+          'title' => $this->t(
+            '%entity_type_name: add/remove %vote_type_name',
+            $type_params
+          ),
+        ];
+      }
     }
-    $perms["delete own $type_id vote"] = [
-      'title' => $this->t('%type_name: delete own vote', $type_params),
-    ];
-    $perms["delete any $type_id vote"] = [
-      'title' => $this->t('%type_name: delete any vote', $type_params),
-    ];
     return $perms;
   }
 
