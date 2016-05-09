@@ -70,14 +70,15 @@ class SettingsForm extends ConfigFormBase {
         '#default_value' => $config->get($id, 0),
       );
     }
-
-    foreach (CommentType::loadMultiple() as $type) {
-      $id = 'comment_' . $type->id() . '_available';
-      $form['vote_types_enabled'][$id] = array(
-        '#type' => 'checkbox',
-        '#title' => $type->label(),
-        '#default_value' => $config->get($id, 0),
-      );
+    if (\Drupal::moduleHandler()->moduleExists('comment')) {
+      foreach (CommentType::loadMultiple() as $type) {
+        $id = 'comment_' . $type->id() . '_available';
+        $form['vote_types_enabled'][$id] = array(
+          '#type' => 'checkbox',
+          '#title' => $type->label(),
+          '#default_value' => $config->get($id, 0),
+        );
+      }
     }
 
     return parent::buildForm($form, $form_state);
@@ -94,11 +95,12 @@ class SettingsForm extends ConfigFormBase {
       $config->set($id, $form_state->getValue($id))->save();
     }
 
-    foreach (CommentType::loadMultiple() as $type) {
-      $id = 'comment_' . $type->id() . '_available';
-      $config->set($id, $form_state->getValue($id))->save();
+    if (\Drupal::moduleHandler()->moduleExists('comment')) {
+      foreach (CommentType::loadMultiple() as $type) {
+        $id = 'comment_' . $type->id() . '_available';
+        $config->set($id, $form_state->getValue($id))->save();
+      }
     }
-
     parent::submitForm($form, $form_state);
   }
 }

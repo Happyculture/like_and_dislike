@@ -37,8 +37,10 @@ class LikeDislikePermissions {
       $perms = array_merge($perms, $this->buildPermissions($type));
     }
     // Generate vote permissions for all comment types.
-    foreach (CommentType::loadMultiple() as $type) {
-      $perms = array_merge($perms, $this->buildPermissions($type));
+    if (\Drupal::moduleHandler()->moduleExists('comment')) {
+      foreach (CommentType::loadMultiple() as $type) {
+        $perms = array_merge($perms, $this->buildPermissions($type));
+      }
     }
 
     return $perms;
