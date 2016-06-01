@@ -8,7 +8,7 @@
 
 use \Drupal\Core\Entity\EntityInterface;
 use \Drupal\Core\Entity\Display\EntityViewDisplayInterface;
-use \Drupal\Core\Url;
+use \Drupal\votingapi\Entity\Vote;
 
 /**
  * Implementing hook_entity_load()
@@ -92,20 +92,21 @@ function like_and_dislike_entity_view(array &$build, EntityInterface $entity, En
   }
 }
 
-function like_and_dislike_vote_insert(EntityInterface $vote) {
-  switch ($vote->bundle()) {
-    case 'like':
-      $vote_type_to_delete = 'dislike';
-      break;
-    case 'dislike':
-      $vote_type_to_delete = 'like';
-      break;
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ *
+ * Removes a previous like when dislinking an entity and reverse.
+ */
+function like_and_dislike_vote_insert(Vote $vote) {
+  $vote_type_to_delete = 'dislike';
+  if ($vote->bundle() == 'dislike') {
+    $vote_type_to_delete = 'like';
   }
-  $vote_storage = \Drupal::entityManager()->getStorage('vote');
-  $vote_storage->deleteUserVotes(
-    $vote->getOwnerId(),
-    $vote_type_to_delete,
+
+  \Drupal::service('like_dislike.helper')->unvote(
     $vote->getVotedEntityType(),
-    $vote->getVotedEntityId()
+    $vote->getVotedEntityId(),
+    $vote_type_to_delete,
+    $vote->getOwner()
   );
 }
