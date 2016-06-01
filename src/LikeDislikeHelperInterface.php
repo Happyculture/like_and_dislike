@@ -51,4 +51,26 @@ interface LikeDislikeHelperInterface {
    */
   public function isAvailableForEntity(EntityInterface $entity);
 
+  /**
+   * Gets the like URL.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to like.
+   *
+   * @return \Drupal\Core\Url
+   *   The URL where to go to add a like to the entity.
+   */
+  public function getLikeUrl(EntityInterface $entity);
+
+  /**
+   * Gets the dislike URL.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to dislike.
+   *
+   * @return \Drupal\Core\Url
+   *   The URL where to go to add a dislike to the entity.
+   */
+  public function getDislikeUrl(EntityInterface $entity);
+
 }

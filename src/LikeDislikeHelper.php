@@ -5,8 +5,10 @@ namespace Drupal\like_and_dislike;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Routing\RedirectDestinationInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\Url;
 use Drupal\votingapi\Entity\Vote;
 use Drupal\votingapi\Entity\VoteType;
 
@@ -28,6 +30,11 @@ class LikeDislikeHelper implements LikeDislikeHelperInterface {
   protected $currentUser;
 
   /**
+   * @var \Drupal\Core\Routing\RedirectDestinationInterface
+   */
+  protected $redirectDestination;
+
+  /**
    * @var \Drupal\Core\Config\ImmutableConfig
    */
   protected $config;
@@ -37,12 +44,14 @@ class LikeDislikeHelper implements LikeDislikeHelperInterface {
    *
    * @param EntityTypeManager $entityTypeManager
    * @param AccountProxyInterface $currentUser
+   * @param RedirectDestinationInterface $redirectDestination
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    */
-  public function __construct(EntityTypeManager $entityTypeManager, AccountProxyInterface $currentUser, ConfigFactoryInterface $configFactory) {
+  public function __construct(EntityTypeManager $entityTypeManager, AccountProxyInterface $currentUser, RedirectDestinationInterface $redirectDestination, ConfigFactoryInterface $configFactory) {
     $this->voteStorage = $entityTypeManager->getStorage('vote');
     $this->voteTypeStorage = $entityTypeManager->getStorage('vote_type');
     $this->currentUser = $currentUser;
+    $this->redirectDestination = $redirectDestination;
     $this->config = $configFactory->get('like_and_dislike.settings');
   }
 
@@ -99,6 +108,39 @@ class LikeDislikeHelper implements LikeDislikeHelperInterface {
    */
   public function isAvailableForEntity(EntityInterface $entity) {
     return NULL !== $this->config->get($entity->getEntityTypeId() . '_' . $entity->bundle() . '_available');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLikeUrl(EntityInterface $entity) {
+    return $this->generateVoteUrl($entity, 'like');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDislikeUrl(EntityInterface $entity) {
+    return $this->generateVoteUrl($entity, 'dislike');
+  }
+
+  /**
+   * Generates the vote URL.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity on which the vote might be saved.
+   * @param string $vote_type_id
+   *   The vote type ID of the vote.
+   * @return \Drupal\Core\Url
+   *   The URL of the vote.
+   */
+  protected function generateVoteUrl(EntityInterface $entity, $vote_type_id) {
+    return Url::fromRoute('like_and_dislike.vote', [
+      'entity_type_id' => $entity->getEntityTypeId(),
+      'vote_type_id' => $vote_type_id,
+      'entity_id' => $entity->id(),
+      'destination' => $this->redirectDestination->get(),
+    ]);
   }
 
 }
