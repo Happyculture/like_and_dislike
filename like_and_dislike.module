@@ -16,12 +16,12 @@ use \Drupal\votingapi\Entity\Vote;
  * Loads the like/dislike information to the entity object
  */
 function like_and_dislike_entity_load(array $entities, $entity_type_id) {
-  $config = \Drupal::config('like_and_dislike.settings');
+  /** @var \Drupal\like_and_dislike\LikeDislikeHelperInterface $helper */
+  $helper = \Drupal::service('like_dislike.helper');
   $vote_result_storage = \Drupal::entityManager()->getStorage('vote_result');
 
   foreach ($entities as $entity) {
-    $config_id = $entity->getEntityTypeId() . '_' . $entity->bundle() . '_available';
-    if ($config->get($config_id, FALSE)) {
+    if ($helper->isAvailableForEntity($entity)) {
       $like = $vote_result_storage->getEntityResults(
         $entity_type_id, $entity->id(), 'like', 'vote_count'
       );
@@ -38,18 +38,18 @@ function like_and_dislike_entity_load(array $entities, $entity_type_id) {
  * Renders the like/dislike buttons if the user has permission to see it
  */
 function like_and_dislike_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
-  $config = \Drupal::config('like_and_dislike.settings');
-  $enabled_view_modes = ['full'];
-  $config_id = $entity->getEntityTypeId() . '_' . $entity->bundle() . '_available';
-
-  $entity_type_ids_available_to_vote = \Drupal\like_and_dislike\LikeDislikePermissions::getEntityTypesAvailableToVote();
-
+  /** @var \Drupal\like_and_dislike\LikeDislikeHelperInterface $helper */
+  $helper = \Drupal::service('like_dislike.helper');
+  /** @var \Drupal\Core\Session\AccountInterface $account */
   $account = \Drupal::currentUser();
+
+  $enabled_view_modes = ['full'];
+  $entity_type_ids_available_to_vote = \Drupal\like_and_dislike\LikeDislikePermissions::getEntityTypesAvailableToVote();
 
   if (
     in_array($entity->getEntityTypeId(), $entity_type_ids_available_to_vote)
-    && $config->get($config_id, FALSE)
     && in_array($view_mode, $enabled_view_modes)
+    && $helper->isAvailableForEntity($entity)
   ) {
     $entity_type_id = $entity->getEntityTypeId();
     $links = [];

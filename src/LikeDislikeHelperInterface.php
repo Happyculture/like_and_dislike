@@ -2,6 +2,7 @@
 
 namespace Drupal\like_and_dislike;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 
 interface LikeDislikeHelperInterface {
@@ -38,5 +39,16 @@ interface LikeDislikeHelperInterface {
    * @return void
    */
   public function unvote($entity_type_id, $entity_id, $vote_type_id, AccountInterface $account = NULL);
+
+  /**
+   * Checks if the votes are enabled for this entity.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to check.
+   *
+   * @return bool
+   *   TRUE if the votes are allowed on the entity, FALSE otherwise.
+   */
+  public function isAvailableForEntity(EntityInterface $entity);
 
 }

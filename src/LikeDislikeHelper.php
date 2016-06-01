@@ -2,6 +2,8 @@
 
 namespace Drupal\like_and_dislike;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
@@ -26,15 +28,22 @@ class LikeDislikeHelper implements LikeDislikeHelperInterface {
   protected $currentUser;
 
   /**
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  protected $config;
+
+  /**
    * LikeDislikeHelper constructor.
    *
    * @param EntityTypeManager $entityTypeManager
    * @param AccountProxyInterface $currentUser
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    */
-  public function __construct(EntityTypeManager $entityTypeManager, AccountProxyInterface $currentUser) {
+  public function __construct(EntityTypeManager $entityTypeManager, AccountProxyInterface $currentUser, ConfigFactoryInterface $configFactory) {
     $this->voteStorage = $entityTypeManager->getStorage('vote');
     $this->voteTypeStorage = $entityTypeManager->getStorage('vote_type');
     $this->currentUser = $currentUser;
+    $this->config = $configFactory->get('like_and_dislike.settings');
   }
 
   /**
@@ -83,6 +92,13 @@ class LikeDislikeHelper implements LikeDislikeHelperInterface {
       $entity_type_id,
       $entity_id
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isAvailableForEntity(EntityInterface $entity) {
+    return NULL !== $this->config->get($entity->getEntityTypeId() . '_' . $entity->bundle() . '_available');
   }
 
 }
