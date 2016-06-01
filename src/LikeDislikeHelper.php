@@ -58,7 +58,7 @@ class LikeDislikeHelper implements LikeDislikeHelperInterface {
   /**
    * {@inheritdoc}
    */
-  public function vote($entity_type_id, $entity_id, $vote_type_id, AccountInterface $account = NULL) {
+  public function hasVote($entity_type_id, $entity_id, $vote_type_id, AccountInterface $account = NULL) {
     if (NULL === $account) {
       $account = $this->currentUser;
     }
@@ -69,7 +69,18 @@ class LikeDislikeHelper implements LikeDislikeHelperInterface {
       $entity_type_id,
       $entity_id
     );
-    if (!empty($user_votes)) {
+    return !empty($user_votes);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function vote($entity_type_id, $entity_id, $vote_type_id, AccountInterface $account = NULL) {
+    if (NULL === $account) {
+      $account = $this->currentUser;
+    }
+
+    if ($this->hasVote($entity_type_id, $entity_id, $vote_type_id, $account)) {
       throw new AlreadyVotedException();
     }
 

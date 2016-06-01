@@ -8,6 +8,23 @@ use Drupal\Core\Session\AccountInterface;
 interface LikeDislikeHelperInterface {
 
   /**
+   * Checks if an user already has a vote of the given type.
+   *
+   * @param $entity_type_id
+   *   The entity type on which the vote is done.
+   * @param $entity_id
+   *   The entity ID on which the vote is done.
+   * @param $vote_type_id
+   *   The ID of the Vote Type.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user account that owns the vote.
+   *
+   * @return bool
+   *   TRUE if the user has a vote of the given type, FALSE otherwise.
+   */
+  public function hasVote($entity_type_id, $entity_id, $vote_type_id, AccountInterface $account = NULL);
+
+  /**
    * Saves a vote.
    *
    * @param $entity_type_id
