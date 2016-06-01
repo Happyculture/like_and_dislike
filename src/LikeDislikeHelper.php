@@ -93,6 +93,7 @@ class LikeDislikeHelper implements LikeDislikeHelperInterface {
     $vote->setVotedEntityType($entity_type_id);
     $vote->setValueType($vote_type->getValueType());
     $vote->setValue(1);
+    $vote->setOwnerId($account->id());
     $vote->save();
 
     return $vote;
