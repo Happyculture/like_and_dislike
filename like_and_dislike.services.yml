@@ -1,0 +1,4 @@
+services:
+  like_dislike.helper:
+    class: Drupal\like_and_dislike\LikeDislikeHelper
+    arguments: ['@entity_type.manager', '@current_user']
