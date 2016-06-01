@@ -11,9 +11,9 @@ use \Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use \Drupal\votingapi\Entity\Vote;
 
 /**
- * Implementing hook_entity_load()
+ * Implements hook_entity_load().
  *
- * Loads the like/dislike information to the entity object
+ * Loads the like/dislike information to the entity object.
  */
 function like_and_dislike_entity_load(array $entities, $entity_type_id) {
   /** @var \Drupal\like_and_dislike\LikeDislikeHelperInterface $helper */
@@ -35,7 +35,9 @@ function like_and_dislike_entity_load(array $entities, $entity_type_id) {
 }
 
 /**
- * Renders the like/dislike buttons if the user has permission to see it
+ * Implements hook_entity_view().
+ *
+ * Renders the like/dislike buttons if the user has permission to see it.
  */
 function like_and_dislike_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
   /** @var \Drupal\like_and_dislike\LikeDislikeHelperInterface $helper */
