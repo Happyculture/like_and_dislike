@@ -10,5 +10,7 @@
     "issues": "http://drupal.org/project/issues/like_and_dislike",
     "source": "http://cgit.drupalcode.org/like_and_dislike"
   },
-  "require": { }
+  "require": {
+    "drupal/votingapi": "8.*"
+  }
 }
